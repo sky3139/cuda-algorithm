@@ -1,5 +1,7 @@
 #pragma once
 #include <cuda.h>
+#include <cassert>
+#include <iostream>
 #include "./cuCheck.h"
 template <class T>
 struct Point
@@ -19,14 +21,14 @@ template <class T>
 struct cuBase
 {
     T *devPtr;
-    uint64_t cap;
+    uint64_t capacity;
     uint64_t size;
     //拷贝构造函数
-    cuBase(const cuBase &lth) : devPtr(lth.devPtr), cap(lth.cap), size(lth.size){};
+    cuBase(const cuBase &lth) : devPtr(lth.devPtr), capacity(lth.capacity), size(lth.size){};
     // struct cuBase copy()
     // {
     //     cuBase b;
-    //     //   :  devPtr(lth.devPtr), cap(lth.cap), size(lth.size)
+    //     //   :  devPtr(lth.devPtr), capacity(lth.capacity), size(lth.size)
     //     return cuBase;
     // }
 };
@@ -35,29 +37,29 @@ struct cuVector
 {
 public:
     cuBase<T> *cb;
-    __host__ cuVector(int cap)
+    __host__ cuVector(int capacity)
     {
 
         CK(cudaMallocManaged((void **)&cb, sizeof(cuBase<T>)));
-        cb->cap = cap;
+        cb->capacity = capacity;
         cb->size = 0;
-        CK(cudaMallocManaged((void **)&(cb->devPtr), sizeof(T) * cb->cap));
-        CK(cudaMemset(cb->devPtr, 0, sizeof(T) * cb->cap));
+        CK(cudaMallocManaged((void **)&(cb->devPtr), sizeof(T) * cb->capacity));
+        CK(cudaMemset(cb->devPtr, 0, sizeof(T) * cb->capacity));
     }
-    __host__ cuVector(int cap, T val)
+    __host__ cuVector(int capacity, T val)
     {
         CK(cudaMallocManaged((void **)&cb, sizeof(cuBase<T>)));
-        cb->cap = cap;
-        cb->size = cap;
-        CK(cudaMallocManaged((void **)&(cb->devPtr), sizeof(T) * cb->cap));
-        CK(cudaMemset(cb->devPtr, val, sizeof(T) * cb->cap));
+        cb->capacity = capacity;
+        cb->size = capacity;
+        CK(cudaMallocManaged((void **)&(cb->devPtr), sizeof(T) * cb->capacity));
+        CK(cudaMemset(cb->devPtr, val, sizeof(T) * cb->capacity));
     }
     //拷贝构造函数
     __host__ __device__ cuVector(const cuVector &lth)
     {
         // cb->devPtr = lth.cb->devPtr;
         // cb->size = lth.cb->size;
-        // cb->cap = lth.cb->cap;
+        // cb->capacity = lth.cb->capacity;
         cb = lth.cb;
     }
     __host__ void release()
@@ -71,6 +73,7 @@ public:
     }
     __host__ __device__ void push_back(T val)
     {
+        assert(cb->size < cb->capacity);
         cb->devPtr[cb->size++] = val;
     }
     __host__ __device__ inline T &operator[](size_t x)
@@ -81,12 +84,25 @@ public:
     {
         return cb->size;
     }
-    __host__ __device__ inline size_t cap()
+    __host__ __device__ inline size_t capacity()
     {
-        return cb->cap;
+        return cb->capacity;
     }
-    // T begin(){};
-    // T end(){};
+    __host__ __device__ inline T &back()
+    {
+        return *(cb->devPtr + cb->size - 1);
+    }
+    __host__ __device__ inline void pop_back()
+    {
+        assert(cb->size != 0);
+        cb->size--;
+    }
+    void print()
+    {
+       std:: cout << size() << " " << capacity() << std:: endl;
+    }
+    T *begin() { return cb->devPtr; };
+    T *end() { return cb->devPtr + cb->capacity; };
 };
 template <class T>
 class cuVector2D : public cuVector<T>
@@ -106,13 +122,13 @@ public:
     {
         // if (rows < pitch)
         //     return mat[x];
-        return ((cuVector<T>::devPtr + cols * row + col));
+        return ((cuVector<T>::cb->devPtr + cols * row + col));
     }
     __host__ __device__ inline T *operator[](size_t row)
     {
         // if (rows < pitch)
         //     return mat[x];
-        return cuVector<T>::devPtr + cols * row;
+        return cuVector<T>::cb->devPtr + cols * row;
     }
 };
 template <class T>
