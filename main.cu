@@ -5,10 +5,10 @@
 #include "./cuVector.h"
 #include "./cuCheck.h"
 #include "./hull.h"
-
+#include "./prefixsum.h"
 using namespace std;
 
-int main()
+int hull_test()
 {
     Andrew jar;
     vector<vector<int>> input = {{1, 1}, {2, 2}, {2, 0}, {2, 4}, {3, 3}, {4, 2}};
@@ -30,4 +30,11 @@ int main()
         }
         cout << endl;
     }
+}
+int main()
+{
+    prefixsum p;
+    vector<vector<int>> input = {{100, 200, 100}, {200, 50, 200}, {100, 200, 100}};
+    p.imageSmootherGPU(input);
+    p.imageSmoother(input); 
 }

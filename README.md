@@ -3,3 +3,7 @@
 代码功能：代码随时更新，可查看tag切换 
 1. 实现了基本的cuda数组 
 2. 凸包算法 Jarvis 
+最小栅栏
+https://leetcode.cn/problems/erect-the-fence/
+图片平滑
+https://leetcode.cn/problems/image-smoother/

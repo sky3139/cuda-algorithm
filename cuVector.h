@@ -72,7 +72,7 @@ public:
         // cudaFree(cb);
     }
     __host__ __device__ void push_back(T val)
-    {
+    { //多线程时有问题，需要使用原子数
         assert(cb->size < cb->capacity);
         cb->devPtr[cb->size++] = val;
     }
@@ -99,7 +99,7 @@ public:
     }
     void print()
     {
-       std:: cout << size() << " " << capacity() << std:: endl;
+        std::cout << size() << " " << capacity() << std::endl;
     }
     T *begin() { return cb->devPtr; };
     T *end() { return cb->devPtr + cb->capacity; };
@@ -109,7 +109,7 @@ class cuVector2D : public cuVector<T>
 {
 public:
     size_t rows, cols;
-    cuVector2D(int rows, int cols) : cuVector<T>(rows * cols), rows(rows), cols(cols)
+    cuVector2D(int rows, int cols,T val) : cuVector<T>(rows * cols,val), rows(rows), cols(cols)
     {
         // CK(cudaMallocManaged((void **)&devPtr, sizeof(T) * size));
         // CK(cudaMemset(devPtr, 0, sizeof(T) * size));
