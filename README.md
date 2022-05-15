@@ -7,3 +7,5 @@
 https://leetcode.cn/problems/erect-the-fence/
 图片平滑
 https://leetcode.cn/problems/image-smoother/
+三角形最大面积
+https://leetcode.cn/problems/largest-triangle-area/
